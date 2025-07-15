@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Happy Birthday Matrix</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      overflow: hidden;
+      height: 100%;
+      width: 100%;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    #text {
+      z-index: 1;
+      font-size: 2.8em;
+      text-align: center;
+      white-space: pre-line;
+      background: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+      animation: rainbow 5s linear infinite;
+      filter: drop-shadow(0 0 6px white);
+    }
+
+    @keyframes rainbow {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+
+    .fade-out {
+      animation: disperse 1.2s forwards;
+    }
+
+    .fade-in {
+      animation: assemble 1.2s forwards;
+    }
+
+    @keyframes disperse {
+      0% {
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0px);
+        letter-spacing: 2px;
+      }
+      100% {
+        opacity: 0;
+        transform: scale(0.6) translateY(40px);
+        filter: blur(10px);
+        letter-spacing: 30px;
+      }
+    }
+
+    @keyframes assemble {
+      0% {
+        opacity: 0;
+        transform: scale(0.6) translateY(-40px);
+        filter: blur(10px);
+        letter-spacing: 30px;
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0px);
+        letter-spacing: 2px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrixCanvas"></canvas>
+  <div id="text"></div>
+
+  <script>
+    // ===== Matrix Effect =====
+    const canvas = document.getElementById('matrixCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const letters = 'HAPPYBIRTHDAY260845';
+    const fontSize = 16;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = Array(columns).fill(1);
+
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters.charAt(Math.floor(Math.random() * letters.length));
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, '#8A2BE2'); // ม่วง
+        gradient.addColorStop(1, '#FF69B4'); // ชมพู
+        ctx.fillStyle = gradient;
+        ctx.font = fontSize + 'px monospace';
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975)
+          drops[i] = 0;
+        drops[i]++;
+      }
+    }
+
+    setInterval(drawMatrix, 33);
+
+    // ===== ข้อความแบบ Typewriter + Effect =====
+    const textEl = document.getElementById('text');
+    const messages = [
+      '3',
+      '2',
+      '1',
+      'HAPPY BIRTHDAY\n     TO YOU',
+      '26/08/45'
+    ];
+    const timings = [1000, 1000, 1000, 3000, null]; // ปรับให้ข้อความ TO YOU ค้างไว้ 3 วินาที
+    let index = 0;
+
+    function typeText(text, callback) {
+      let i = 0;
+      textEl.textContent = '';
+      const chars = text.split('');
+      const interval = setInterval(() => {
+        textEl.textContent += chars[i];
+        i++;
+        if (i >= chars.length) {
+          clearInterval(interval);
+          if (callback) callback();
+        }
+      }, 80);
+    }
+
+    function showNext() {
+      if (index >= messages.length) return;
+
+      textEl.classList.remove('fade-in');
+      textEl.classList.add('fade-out');
+
+      setTimeout(() => {
+        textEl.classList.remove('fade-out');
+        textEl.classList.add('fade-in');
+        typeText(messages[index], () => {
+          if (timings[index] !== null) {
+            setTimeout(() => {
+              index++;
+              showNext();
+            }, timings[index]);
+          }
+        });
+      }, 1200);
+    }
+
+    setTimeout(showNext, 1000);
+  </script>
+</body>
+</html>
